@@ -1,0 +1,7 @@
+{
+  "name": "TaxPadi",
+  "description": "An essential, automated tax compliance partner for Nigerian SMEs and freelancers to navigate the new 2025/2026 tax regime.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
