@@ -1,6 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
 import { CompanyStatus } from '../../types';
+import { InfoIcon } from '../icons';
+import { Tooltip } from '../ui/Tooltip';
 
 interface LevyCalculatorProps {
   companyStatus: CompanyStatus;
@@ -47,13 +48,22 @@ export const LevyCalculator: React.FC<LevyCalculatorProps> = ({ companyStatus })
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
-      <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">"Levy-in-One" Calculator</h1>
-      <p className="text-gray-600 dark:text-gray-400 mb-8">For Medium/Large Companies, calculate your unified Development Levy.</p>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">"Levy-in-One" Calculator</h1>
+        <p className="text-gray-600 dark:text-gray-400">For Medium/Large Companies, calculate your unified Development Levy.</p>
+      </div>
       
       <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg space-y-6">
         <div>
-          <label htmlFor="profits" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enter your assessable profits (₦)</label>
-          <div className="mt-1 relative rounded-md shadow-sm">
+          <div className="flex items-center gap-2 mb-1">
+             <label htmlFor="profits" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enter your assessable profits (₦)</label>
+             <Tooltip content="Profit adjusted for tax purposes according to CITA." position="right">
+                <button className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+                    <InfoIcon className="w-4 h-4" />
+                </button>
+             </Tooltip>
+          </div>
+          <div className="relative rounded-md shadow-sm">
              <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
                 <span className="text-gray-500 sm:text-sm">₦</span>
             </div>
@@ -62,14 +72,19 @@ export const LevyCalculator: React.FC<LevyCalculatorProps> = ({ companyStatus })
               id="profits"
               value={assessableProfits}
               onChange={(e) => setAssessableProfits(formatNumber(e.target.value))}
-              className="w-full pl-7 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+              className="block w-full pl-7 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm transition-colors"
               placeholder="e.g., 25,000,000"
             />
           </div>
         </div>
         
-        <div className="bg-gray-50 dark:bg-gray-700/50 p-6 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">Calculated Development Levy (4%)</h3>
+        <div className="bg-gray-50 dark:bg-gray-700/50 p-6 rounded-lg border border-gray-100 dark:border-gray-600">
+          <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">Calculated Development Levy (4%)</h3>
+              <Tooltip content="4% of Assessable Profit">
+                <span className="text-gray-400"><InfoIcon className="w-4 h-4" /></span>
+              </Tooltip>
+          </div>
           <p className="mt-1 text-4xl font-bold text-indigo-600 dark:text-indigo-400">₦{developmentLevy.toLocaleString()}</p>
         </div>
 

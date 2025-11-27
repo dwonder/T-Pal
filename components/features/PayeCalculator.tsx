@@ -1,6 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
 import { PayeResult } from '../../types';
+import { InfoIcon } from '../icons';
+import { Tooltip } from '../ui/Tooltip';
 
 const formatNumber = (value: string) => {
     return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -53,83 +54,123 @@ export const PayeCalculator: React.FC = () => {
     const freelancerResults = useMemo(() => {
         const income = parseFormattedNumber(freelanceIncome);
         if (!income) return null;
-        // Simplified for freelancers, doesn't include pension/NHF by default.
-        // A more complex implementation would make these optional.
         const consolidatedRelief = 200000 + (0.2 * income);
         let taxableIncome = income - consolidatedRelief;
         taxableIncome = Math.max(0, taxableIncome);
-        const pitResult = calculatePaye(income); // use PAYE bands
+        const pitResult = calculatePaye(income);
         return pitResult.paye;
     }, [freelanceIncome]);
 
     const TabButton: React.FC<{ tabId: 'sme' | 'freelancer', text: string }> = ({ tabId, text }) => (
         <button
             onClick={() => setActiveTab(tabId)}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
+            className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
                 activeTab === tabId
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-white text-indigo-600 shadow-sm dark:bg-gray-800 dark:text-white'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
         >
             {text}
         </button>
     );
 
+    const ResultCard: React.FC<{ label: string; value: number; type: 'red' | 'blue' | 'indigo' | 'green'; tooltip: string }> = ({ label, value, type, tooltip }) => {
+        const colors = {
+            red: 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border-red-100 dark:border-red-900',
+            blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-100 dark:border-blue-900',
+            indigo: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-200 border-indigo-100 dark:border-indigo-900',
+            green: 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-100 dark:border-green-900',
+        };
+
+        return (
+             <div className={`p-5 rounded-xl border ${colors[type]}`}>
+                <div className="flex justify-between items-center mb-1">
+                    <p className={`text-sm font-medium opacity-80`}>{label}</p>
+                    <Tooltip content={tooltip} position="bottom">
+                         <span className="opacity-50 hover:opacity-100 cursor-pointer"><InfoIcon className="w-3.5 h-3.5" /></span>
+                    </Tooltip>
+                </div>
+                <p className="font-bold text-xl">₦{(value / 12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
+        );
+    };
+
     return (
         <div className="max-w-4xl mx-auto p-4 md:p-6">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">PAYE & Personal Tax (PIT) Calculator</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">Calculate payroll deductions for employees or estimate your personal tax liability.</p>
-
-            <div className="flex justify-center mb-6 bg-gray-100 dark:bg-gray-900 p-1 rounded-lg">
-                <TabButton tabId="sme" text="For SMEs (PAYE)" />
-                <TabButton tabId="freelancer" text="For Freelancers (PIT)" />
+            <div className="mb-6">
+                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">PAYE & Personal Tax Calculator</h1>
+                 <p className="text-gray-600 dark:text-gray-400">Calculate payroll deductions for employees or estimate your personal tax liability.</p>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+            <div className="flex justify-center mb-8">
+                <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-xl inline-flex shadow-inner">
+                    <TabButton tabId="sme" text="For SMEs (PAYE)" />
+                    <TabButton tabId="freelancer" text="For Freelancers (PIT)" />
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
                 {activeTab === 'sme' && (
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">SME Payroll Calculator</h2>
-                        <label htmlFor="salary" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enter Employee's Gross Monthly Salary (₦)</label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
-                            <input type="text" id="salary" value={grossSalary} onChange={e => setGrossSalary(formatNumber(e.target.value))} className="w-full pl-4 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., 250,000" />
+                    <div className="space-y-6">
+                        <div className="border-b border-gray-100 dark:border-gray-700 pb-4">
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">SME Payroll Calculator</h2>
+                            <label htmlFor="salary" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enter Employee's Gross Monthly Salary (₦)</label>
+                            <div className="relative rounded-md shadow-sm max-w-md">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                                    <span className="text-gray-500 sm:text-sm">₦</span>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="salary" 
+                                    value={grossSalary} 
+                                    onChange={e => setGrossSalary(formatNumber(e.target.value))} 
+                                    className="block w-full pl-7 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm transition-colors" 
+                                    placeholder="e.g., 250,000" 
+                                />
+                            </div>
                         </div>
                         {smeResults && (
-                            <div className="mt-6 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Monthly Deductions & Net Pay</h3>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                                    <div className="p-4 bg-red-50 dark:bg-red-900/50 rounded-lg">
-                                        <p className="text-sm text-red-600 dark:text-red-300">PAYE</p>
-                                        <p className="font-bold text-lg text-red-800 dark:text-red-200">₦{(smeResults.paye / 12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                    </div>
-                                    <div className="p-4 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
-                                        <p className="text-sm text-blue-600 dark:text-blue-300">Pension</p>
-                                        <p className="font-bold text-lg text-blue-800 dark:text-blue-200">₦{(smeResults.pension / 12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                    </div>
-                                    <div className="p-4 bg-indigo-50 dark:bg-indigo-900/50 rounded-lg">
-                                        <p className="text-sm text-indigo-600 dark:text-indigo-300">NHF</p>
-                                        <p className="font-bold text-lg text-indigo-800 dark:text-indigo-200">₦{(smeResults.nhf / 12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                    </div>
-                                     <div className="p-4 bg-green-50 dark:bg-green-900/50 rounded-lg">
-                                        <p className="text-sm text-green-600 dark:text-green-300">Net Pay</p>
-                                        <p className="font-bold text-lg text-green-800 dark:text-green-200">₦{(smeResults.netPay / 12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                    </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Monthly Deductions & Net Pay</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                    <ResultCard label="PAYE Tax" value={smeResults.paye} type="red" tooltip="Personal Income Tax payable to the State." />
+                                    <ResultCard label="Pension" value={smeResults.pension} type="blue" tooltip="8% Employee Pension Contribution." />
+                                    <ResultCard label="NHF" value={smeResults.nhf} type="indigo" tooltip="2.5% National Housing Fund (if applicable)." />
+                                    <ResultCard label="Net Pay" value={smeResults.netPay} type="green" tooltip="Take-home pay after statutory deductions." />
                                 </div>
                             </div>
                         )}
                     </div>
                 )}
                 {activeTab === 'freelancer' && (
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Freelancer Personal Income Tax (PIT) Estimator</h2>
-                        <label htmlFor="income" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Enter Your Total Annual Income (₦)</label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
-                             <input type="text" id="income" value={freelanceIncome} onChange={e => setFreelanceIncome(formatNumber(e.target.value))} className="w-full pl-4 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., 5,000,000" />
+                    <div className="space-y-6">
+                         <div className="border-b border-gray-100 dark:border-gray-700 pb-4">
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Freelancer PIT Estimator</h2>
+                            <label htmlFor="income" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enter Your Total Annual Income (₦)</label>
+                            <div className="relative rounded-md shadow-sm max-w-md">
+                                 <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                                    <span className="text-gray-500 sm:text-sm">₦</span>
+                                </div>
+                                 <input 
+                                    type="text" 
+                                    id="income" 
+                                    value={freelanceIncome} 
+                                    onChange={e => setFreelanceIncome(formatNumber(e.target.value))} 
+                                    className="block w-full pl-7 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm transition-colors" 
+                                    placeholder="e.g., 5,000,000" 
+                                />
+                            </div>
                         </div>
                         {freelancerResults !== null && (
-                             <div className="mt-6 bg-gray-50 dark:bg-gray-700/50 p-6 rounded-lg">
-                                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">Estimated Annual Tax Liability</h3>
-                                <p className="mt-1 text-4xl font-bold text-indigo-600 dark:text-indigo-400">₦{freelancerResults.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                {parseFormattedNumber(freelanceIncome) <= 800000 && <p className="text-sm mt-2 text-green-600 dark:text-green-400">Your income is below the ₦800,000 threshold, so you are exempt from Personal Income Tax.</p>}
+                             <div className="bg-gray-50 dark:bg-gray-700/50 p-6 rounded-lg border border-gray-200 dark:border-gray-600">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">Estimated Annual Tax Liability</h3>
+                                    <Tooltip content="Estimated tax based on standard Consolidated Relief Allowance." position="right">
+                                        <span className="text-gray-400"><InfoIcon className="w-4 h-4"/></span>
+                                    </Tooltip>
+                                </div>
+                                <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">₦{freelancerResults.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                {parseFormattedNumber(freelanceIncome) <= 800000 && <p className="text-sm mt-2 text-green-600 dark:text-green-400 font-medium">Your income is below the ₦800,000 threshold, so you are exempt from Personal Income Tax.</p>}
                             </div>
                         )}
                     </div>
