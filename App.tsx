@@ -152,15 +152,15 @@ const App: React.FC = () => {
         <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
             <button 
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="md:hidden fixed top-4 left-4 z-50 p-2 text-gray-500 bg-white rounded-md dark:bg-gray-800 dark:text-gray-300">
+                className="md:hidden fixed top-4 left-4 z-50 p-2 text-gray-500 bg-white rounded-md dark:bg-gray-800 dark:text-gray-300 print:hidden">
                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLineCap="round" strokeLineJoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
             
-            <aside className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+            <aside className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 print:hidden`}>
                 {sidebarContent}
             </aside>
             
-            <main className="flex-1 p-4 md:ml-64 overflow-y-auto">
+            <main className="flex-1 p-4 md:ml-64 print:ml-0 overflow-y-auto print:overflow-visible">
                  <div className="mt-12 md:mt-0">
                     {renderView()}
                  </div>
